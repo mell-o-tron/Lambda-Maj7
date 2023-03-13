@@ -6,19 +6,20 @@ def Token (t, n):
 
 def Tree (tok, lis):
     #print(lis)
-    if tok [1] == "start":
+    if tok [1] == "start":                  # returns next string
         return lis[0]
     
     if tok[1] == "expr":
-        if type(lis[0]) == str:
+        if type(lis[0]) == str:             # returns next string if non-terminal
             return lis[0]
-        elif type(lis[0]) == tuple:
+        elif type(lis[0]) == tuple:         # handles TERMINALS
             if lis[0][0] == "IDE":
                 return f"Var(\"{lis[0][1]}\")"
             if lis[0][0] == "SYM":
                 return f"Sym(Var(\"{lis[0][1]}\"))"
     
-    if tok[1] == "atom":
+    if tok[1] == "atom":                    # same deal with terminals and non-terminals
+        
         if type(lis[0]) == tuple and lis[0][0] == "INTEGER":
             return f"Atom(Int({lis[0][1]}))"
         elif type(lis[0]) == str:
@@ -57,11 +58,18 @@ def Tree (tok, lis):
     
     if tok[1] == "expr_app":
         return f"Apply(FunExpr({lis[0]}), [{lis[1]}])"
+    
+    if tok[1] == "letin":
+        return f"LetIn({lis[0]}, {lis[2]})"             # 2 because for some reason I added IN 
+                                                        # as an explicit terminal
+    if tok[1] == "decl":
+        return f"Decl(Var(\"{lis[0][1]}\"), {lis[1]})"
+    
     return "idk"
 
 
 
-program = "f (lam (x) => {1})"
+program = "x := 5; x"
 f = open("pg.lark", "r")
 l = Lark(f.read())
 

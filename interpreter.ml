@@ -7,7 +7,9 @@ type identifier = Var of string
 type env = identifier -> simple_type
 and  simple_type = Int of int | Unbound | Closure of identifier * expr * env | AnonFun of identifier * expr
 and  func = Nop of noper | Uop of uoper | Lambda of identifier * expr | FunExpr of expr
-and  expr  = Atom of simple_type | Apply of func * (expr list) | Sym of identifier
+and  expr = Atom of simple_type | Apply of func * (expr list) | Sym of identifier | LetIn of decl * expr
+and  decl = Decl of identifier * expr
+
 
 
 
@@ -62,11 +64,15 @@ let rec eval env x = match x with
                             | Closure (x, e1, env1) -> ((eval env1) (Apply((Lambda (x, e1)) , lis)))
                             | _ -> failwith ("type error, closure expected"))
         
+        
 (*         | _ -> failwith ("error in eval") *)
         
         )
-    | Sym x -> match x with Var(v) -> eval env (Atom (env (x)))
-
+    | Sym x -> (match x with Var(v) -> eval env (Atom (env (x))))
+    | LetIn (d, e)  -> (match d with
+                        | Decl(x, e1) ->    let new_env = bind(x, (eval env) e1, env)
+                                            in (eval new_env) e
+                        )
     
     
 let print_simple_type x = match x with
@@ -77,7 +83,7 @@ let print_simple_type x = match x with
 
 (* (lam (x) . (+ (x, x)))(5) *)
 
-let x = Apply(FunExpr(Sym(Var("f"))), [Atom(AnonFun(Var ("x"), Atom(Int(1))))])
+let x = LetIn(Decl(Var("x"), Atom(Int(5))), Sym(Var("x")))
 
 
 (* eval emptyenv x ;; *)

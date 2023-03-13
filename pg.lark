@@ -9,8 +9,11 @@ lambda_app  : lambda expr
 op          : UOP expr | NOP "(" (expr + ",")* expr ")"
 IDE         : WORD
 SYM         : IDE
+IN          : ";" 
+decl        : SYM ":=" expr
+letin       : decl IN expr
 
-expr        : atom | op | lambda_app | expr_app | SYM | "(" + expr + ")"
+expr        : atom | op | lambda_app | expr_app | SYM | "(" + expr + ")" | letin
 
 start       : expr
 
