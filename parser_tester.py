@@ -1,9 +1,6 @@
 from lark import Lark
 
 
-
-
-
 def Token (t, n):
     return (t, n)
 
@@ -63,18 +60,14 @@ def Tree (tok, lis):
     return "idk"
 
 
-def parse_program (program):
-    #print(program)
-    f = open("pg.lark", "r")
 
-    l = Lark(f.read())
+program = "f (lam (x) => {1})"
+f = open("pg.lark", "r")
+l = Lark(f.read())
 
-    a = eval(str(l.parse(program)))
+b = str(l.parse(program))
 
-
-    f = open("out.ml", "w")
-    f.write(f"#use \"interpreter.ml\";;\n\nlet a = {a};;\n\nlet result = (eval emptyenv) a;;\n\nprint_simple_type result;;")
-    f.close()
-        
-    #print(a)
+print(b)
+a = eval(b)
+print(a)
 

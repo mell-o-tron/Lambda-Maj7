@@ -1,6 +1,6 @@
 #use "interpreter.ml";;
 
-let a = Apply(Lambda(Var("x"), Apply(Nop(Mul), [Apply(Uop(Neg), [Apply(Nop(Add), [Sym(Var("x")) ; Sym(Var("x")) ; Apply(Uop(Neg), [Atom(Int(2))])])]) ; Apply(Nop(Add), [Sym(Var("x")) ; Sym(Var("x"))])])), [Atom(Int(5))]);;
+let a = Apply(FunExpr(Apply(Lambda(Var("x"), Atom(AnonFun(Var ("y"), Apply(Nop(Add), [Sym(Var("x")) ; Sym(Var("y"))])))), [Atom(Int(4))])), [Atom(Int(1))]);;
 
 let result = (eval emptyenv) a;;
 
