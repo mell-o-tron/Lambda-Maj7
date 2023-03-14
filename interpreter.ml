@@ -58,7 +58,11 @@ let print_simple_type x = match x with
 
 (* Expression evalutaion *)
 
-let rec eval env x = match x with
+let rec eval env x = 
+(*
+print_simple_type (env (Var("x")));*)
+
+match x with
     | Atom (a) -> (match a with
                     | AnonFun (id, x) -> Closure (id, x, env)
                     | _ -> a )
@@ -71,10 +75,11 @@ let rec eval env x = match x with
             | Neg   -> negate_int (List.map (eval env) lis)
             )
             
-        | Lambda (x, e) -> (if List.length(lis) = 1 then
+        | Lambda (x, e) ->  (*print_string "Applying lambda...\n";*)
+                            (if List.length(lis) = 1 then
                                 let arg_value = (eval env)(List.hd(lis)) in
-                                (match x with Var (name) -> print_string (name ^ " = "));
-                                print_simple_type (arg_value);
+                                (*(match x with Var (name) -> print_string (name ^ " = "));*)           (* DEBUG *)
+                                print_simple_type (arg_value);                                          (* DEBUG *)
                                 let new_env = (bind (x, arg_value, env)) in 
                                 ((eval new_env) e)
                             else failwith ("non-unary function found"))
@@ -84,10 +89,10 @@ let rec eval env x = match x with
                             | Closure (x, e1, env1) -> ((eval env1) (Apply((Lambda (x, e1)) , lis)))
                             | RecClosure (n, x, e1, env1) -> 
                                     
-                                    (match n with Var (name) -> print_string (name ^ "("));        (* DEBUG *)
-                                    (match x with Var (name) -> print_string (name ^ ")\n"));
-                                    
-                                    let env_rec = bind( n, e_evald, env1 ) in
+                                    (*(match n with Var (name) -> print_string (name ^ "("));*)        (* DEBUG *)
+                                    (*(match x with Var (name) -> print_string (name ^ ")\n"));*)
+                                    let env1_with_arg = bind (x, env(x), env1) in
+                                    let env_rec = bind( n, e_evald, env1_with_arg ) in
                                     ((eval env_rec) (Apply((Lambda (x, e1)) , lis)))
                                     
                             | Unbound -> failwith ("type error, closure expected and unbound found")
