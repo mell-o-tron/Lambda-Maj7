@@ -1,8 +1,8 @@
 INTEGER     : /[0-9]+/
 anonfun     : "lam" "(" IDE ")" "=>" "{" expr "}"
 atom        : INTEGER | anonfun
-NOP         : "+" | "*"
-UOP         : "-"
+NOP         : "+" | "*" | "/" | "=" | ">" | ">=" | "<" | "<=" | "&" | "^"
+UOP         : "-" | "!"
 expr_app    : expr expr
 lambda      : "lam" "(" IDE ")" "=>" "{" expr "}"
 lambda_app  : lambda expr
@@ -12,8 +12,8 @@ SYM         : IDE
 IN          : ";" 
 decl        : SYM ":=" expr
 letin       : decl IN expr
-
-expr        : atom | op | lambda_app | expr_app | SYM | "(" + expr + ")" | letin
+conditional :  expr "?" expr ":" expr
+expr        : conditional | atom | op | lambda_app | expr_app | SYM | "(" + expr + ")" | letin
 
 start       : expr
 

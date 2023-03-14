@@ -30,15 +30,34 @@ def Tree (tok, lis):
     
     
     if tok[1] == "op":
-        if lis[0][1] == "+" or lis[0][1] == "*":        # n-ary operations
+        if lis[0][1] in ["+", "*", "/", "^", "&", "=", ">", ">=", "<", "<="]:        # n-ary operations
             operation = ""
+            
+            #type noper = Add | Mul | And | Or | Equals | Greater | GreaterEq | Less | LessEq
+            #type uoper = Neg | Not
+
             
             if lis[0][1] == "+":
                 operation = "Add"
             elif lis[0][1] == "*":
                 operation = "Mul"
-            
-            
+            elif lis[0][1] == "/":
+                operation = "Div"
+            elif lis[0][1] == "^":
+                operation = "Or"
+            elif lis[0][1] == "&":
+                operation = "And"
+            elif lis[0][1] == "=":
+                operation = "Equals"
+            elif lis[0][1] == ">":
+                operation = "Greater"            
+            elif lis[0][1] == ">=":
+                operation = "GreaterEq"
+            elif lis[0][1] == "<":
+                operation = "Less"            
+            elif lis[0][1] == ">=":
+                operation = "LessEq"            
+
             operands = ""
             for i in range(1, len(lis)):
                 operands += lis[i]
@@ -46,10 +65,14 @@ def Tree (tok, lis):
                     operands += " ; "
             return f"Apply(Nop({operation}), [{operands}])"
         
-        if lis[0][1] == "-":                            # 1-ary operations
-            operation = "Neg"
+        if lis[0][1] in ["-", "!"]: # 1-ary operations
+            operation = ""
+            if lis[0][1] == "-":                            
+                operation = "Neg"
+            if lis[0][1] == "!":                            
+                operation = "Not"
             operand = lis[1]
-            return f"Apply(Uop({operation}), [{operand}])"
+        return f"Apply(Uop({operation}), [{operand}])"
     
     if tok[1] == "lambda_app":
         return f"Apply({lis[0]}, [{lis[1]}])"
@@ -65,7 +88,12 @@ def Tree (tok, lis):
     if tok[1] == "decl":
         return f"Decl(Var(\"{lis[0][1]}\"), {lis[1]})"
     
+    if tok[1] == "conditional":
+        return f"IfThenElse({lis[0]}, {lis[1]}, {lis[2]})"
+    
+    
     return "idk"
+
 
 
 def parse_program (program):
