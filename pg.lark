@@ -1,10 +1,10 @@
 INTEGER     : /[0-9]+/
-anonfun     : "(" "lam" "(" IDE ")" "=>" "{" expr "}" ")"
+anonfun     : "lam" "(" IDE ")" "=>" "{" expr "}"
 atom        : INTEGER | anonfun
 NOP         : "+" | "*"
 UOP         : "-"
 expr_app    : expr expr
-lambda      : "(" "lam" "(" IDE ")" "=>" "{" expr "}" ")"
+lambda      : "lam" "(" IDE ")" "=>" "{" expr "}"
 lambda_app  : lambda expr
 op          : UOP expr | NOP "(" (expr + ",")* expr ")"
 IDE         : WORD
@@ -20,3 +20,8 @@ start       : expr
 %import common.WORD   // imports from terminal library
 %ignore " "           // Disregard spaces in text
 %ignore "\n"           // Disregard spaces in text
+
+COMMENT : /\/\// /.*/
+        | /\/\*/ /.*/ /\*\//
+
+%ignore COMMENT
