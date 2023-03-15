@@ -8,14 +8,14 @@
 - The operations are represented in pre-fix notation, and most of them are n-ary. When I will add lists I'll probably make them binary.
 - The functions are all unary, and there is no syntactic sugar for functions of the type `t1->t2->t3`. You just have to write:
 
-'''
+```
 f := lam(x1) => {
     g := lam(x2) => {
         ...
     }
 };
 (f g) input;
-'''
+```
 
 
 ## Feature ideas
