@@ -1,3 +1,5 @@
+import sys
+
 from lark import Lark
 
 
@@ -100,7 +102,7 @@ def Tree (tok, lis):
 
 def parse_program (program):
     #print(program)
-    f = open("pg.lark", "r")
+    f = open("./source/pg.lark", "r")
 
     l = Lark(f.read())
 
@@ -108,7 +110,7 @@ def parse_program (program):
 
 
     f = open("out.ml", "w")
-    f.write(f"#use \"interpreter.ml\";;\n\nlet a = {a};;\n\nlet result = (eval emptyenv) a;;\n\nprint_simple_type result;;")
+    f.write(f"#use \"./source/interpreter.ml\";;\n\nlet a = {a};;\n\nlet result = (eval emptyenv) a;;\n\nprint_simple_type result;;")
     f.close()
         
     #print(a)
