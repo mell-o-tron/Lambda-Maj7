@@ -97,7 +97,10 @@ def Tree (tok, lis):
 
 
 
-program = "/ (6, 3)"
+
+program = '''y := 5;
+= (1, 0) ? y : y'''
+
 f = open("pg.lark", "r")
 l = Lark(f.read())
 
