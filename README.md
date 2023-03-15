@@ -6,8 +6,7 @@
 ## Features
 - The currently available data types are integers, booleans and lambdas. I'll very soon add lists and floating point numbers.
 - The operations are represented in pre-fix notation, and most of them are n-ary. When I will add lists I'll probably make them binary.
-- The functions are all unary, and there is no syntactic sugar for functions of the type `t1->t2->t3`. You just have to write:
-
+- The functions are all unary, and there is no built-in syntactic sugar for functions of the type `t1->t2->t3`. You just have to write:
 ```
 f := lam(x1) => {
     g := lam(x2) => {
@@ -16,7 +15,18 @@ f := lam(x1) => {
 };
 (f g) input;
 ```
+- Preprocessor: You can include other files with the `#include` directive, and define lexical macros, using regular expressions. Let's say, for example, you wanted to make a macro to use in-fix notation in place of the built-in pre-fix one. You could write the following, and have every instance of `{x #+ y}` be converted to `+(x, y)`:
+```
+#macro "{([^{|}]+)\s*#\+\s*([^{|}]+)}" ~ "+($1, $2)"
 
+{banana #+ {11 #+ 3}}     // becomes +(banana, +(11, 3))
+```
 
-## Feature ideas
-- I'm thinking of adding macros, and use them to add some layers of syntactic sugar (n-ary functions, infix operators...). I'd like to make them very flexible, and allow the user to customize the language as much as possible.
+## Planned features
+- Lists
+- Floating point numbers
+- Parsing error messages, better runtime error messages
+- Static checks
+- Pattern matching
+- Strings
+- I/O (probably OCaml style)
