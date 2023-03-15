@@ -1,18 +1,20 @@
 INTEGER     : /[0-9]+/
-anonfun     : "lam" "(" IDE ")" "=>" "{" expr "}"
-atom        : INTEGER | anonfun
 NOP         : "+" | "*" | "/" | "=" | ">" | ">=" | "<" | "<=" | "&" | "^"
 UOP         : "-" | "!"
+IDE         : /(?!(true|false|lam|if|then|else)\b)[a-z_][a-z0-9_]*/i
+SYM         : IDE
+IN          : ";" 
+BOOL        : "true" | "false"
+
+anonfun     : "lam" "(" IDE ")" "=>" "{" expr "}"
+atom        : INTEGER | anonfun | BOOL
 expr_app    : expr expr
 lambda      : "lam" "(" IDE ")" "=>" "{" expr "}"
 lambda_app  : lambda expr
 op          : UOP expr | NOP "(" (expr + ",")* expr ")"
-IDE         : WORD
-SYM         : IDE
-IN          : ";" 
 decl        : SYM ":=" expr
 letin       : decl IN expr
-conditional :  expr "?" expr ":" expr
+conditional :  "if" expr "then" expr "else" expr
 expr        : conditional | atom | op | lambda_app | expr_app | SYM | "(" + expr + ")" | letin
 
 start       : expr

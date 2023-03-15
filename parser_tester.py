@@ -22,6 +22,8 @@ def Tree (tok, lis):
         
         if type(lis[0]) == tuple and lis[0][0] == "INTEGER":
             return f"Atom(Int({lis[0][1]}))"
+        if type(lis[0]) == tuple and lis[0][0] == "BOOL":
+            return f"Atom(Bool({lis[0][1]}))"
         elif type(lis[0]) == str:
             return lis[0]
         
@@ -98,8 +100,7 @@ def Tree (tok, lis):
 
 
 
-program = '''y := 5;
-= (1, 0) ? y : y'''
+program = "true"
 
 f = open("pg.lark", "r")
 l = Lark(f.read())
