@@ -1,0 +1,81 @@
+<!--  printf-like format strings conversion specifiers  -->
+<language name="Lambda Maj7" section="Sources" version="18" kateversion="5.79" indenter="cstyle" extensions="*.maj7">
+
+<highlighting>
+<list name="controlflow">
+<item>if</item>
+<item>then</item>
+<item>else</item>
+</list>
+<list name="keywords">
+<item>lam</item>
+</list>
+
+
+<!--  https://en.cppreference.com/w/c/language/attributes  -->
+
+<list name="types">
+<item>bool</item>
+<item>int</item>
+
+</list>
+<list name="preprocessor">
+<item>#macro</item>
+<item>#include</item>
+</list>
+
+ <contexts>
+      <context attribute="Normal Text" lineEndContext="#pop" name="Normal Text" >
+        <keyword attribute="Keyword" context="#stay" String="controlflow" />
+        <keyword attribute="Control Flow" context="#stay" String="keywords" />
+        <keyword attribute="Preprocessor" context="#stay" String="preprocessor" />
+        <keyword attribute="Data Type" context="#stay" String="types" />
+
+        <DetectChar attribute="String" context="string" char="&quot;" />
+      </context>
+      <context attribute="String" lineEndContext="#stay" name="string" >
+        <DetectChar attribute="String" context="#pop" char="&quot;" />
+      </context>
+</contexts>
+
+<itemDatas>
+<itemData name="Normal Text" defStyleNum="dsNormal" spellChecking="false"/>
+<itemData name="Control Flow" defStyleNum="dsControlFlow" spellChecking="false"/>
+<itemData name="Keyword" defStyleNum="dsKeyword" spellChecking="false"/>
+<itemData name="Data Type" defStyleNum="dsDataType" spellChecking="false"/>
+<itemData name="Attribute" defStyleNum="dsAttribute" spellChecking="false"/>
+<itemData name="Standard Attribute" defStyleNum="dsAttribute" spellChecking="false"/>
+<itemData name="Decimal" defStyleNum="dsDecVal" spellChecking="false"/>
+<itemData name="Octal" defStyleNum="dsBaseN" spellChecking="false"/>
+<itemData name="Hex" defStyleNum="dsBaseN" spellChecking="false"/>
+<itemData name="Binary" defStyleNum="dsBaseN" spellChecking="false"/>
+<itemData name="Float" defStyleNum="dsFloat" spellChecking="false"/>
+<itemData name="Standard Suffix" defStyleNum="dsBuiltIn" spellChecking="false"/>
+<itemData name="Char" defStyleNum="dsChar" spellChecking="false"/>
+<itemData name="Char Literal Prefix" defStyleNum="dsChar" spellChecking="false"/>
+<itemData name="String" defStyleNum="dsString"/>
+<itemData name="String Char" defStyleNum="dsSpecialChar" spellChecking="false"/>
+<itemData name="String Literal Prefix" defStyleNum="dsString" spellChecking="true"/>
+<itemData name="Comment" defStyleNum="dsComment"/>
+<itemData name="Symbol" defStyleNum="dsOperator" spellChecking="false"/>
+<itemData name="Preprocessor" defStyleNum="dsPreprocessor" spellChecking="false"/>
+<itemData name="Prep. Lib" defStyleNum="dsImport" spellChecking="false"/>
+<itemData name="Region Marker" defStyleNum="dsRegionMarker" spellChecking="false"/>
+<itemData name="Error" defStyleNum="dsError" spellChecking="false"/>
+</itemDatas>
+</highlighting>
+
+ <general>
+    <comments>
+      <comment name="singleLine" start="//"/>
+    </comments>
+    <keywords casesensitive="1"/>
+    <folding indentationsensitive="0"/>
+    <emptyLines>
+      <emptyLine regexpr="\s+"/>
+      <emptyLine regexpr="\s*//.*"/>
+    </emptyLines>
+
+  </general>
+</language>
+<!--  kate: replace-tabs on; tab-width 2; indent-width 2;  -->

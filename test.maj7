@@ -1,4 +1,4 @@
-#include "./test_include"
+#include "./test_include.maj7"
 
 x_banana := false;
 if {x_banana #= false} then 
