@@ -1,5 +1,5 @@
 INTEGER     : /[0-9]+/
-NOP         : "+" | "*" | "/" | "=" | ">" | ">=" | "<" | "<=" | "&" | "^"
+NOP         : "+" | "*" | "/" | "=" | ">" | ">=" | "<" | "<=" | "&" | "^" | "@"
 UOP         : "-" | "!"
 IDE         : /(?!(true|false|lam|if|then|else)\b)[a-z_][a-z0-9_]*/i
 SYM         : IDE
@@ -7,7 +7,8 @@ IN          : ";"
 BOOL        : "true" | "false"
 
 anonfun     : "lam" "(" IDE ")" "=>" "{" expr "}"
-atom        : INTEGER | anonfun | BOOL
+list        : "[" (expr ("," expr)*)? "]"
+atom        : INTEGER | anonfun | BOOL | list
 expr_app    : expr expr
 lambda      : "lam" "(" IDE ")" "=>" "{" expr "}"
 lambda_app  : lambda expr

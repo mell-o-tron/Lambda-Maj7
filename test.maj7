@@ -1,6 +1,10 @@
 #include "./test_include.maj7"
 
 x_banana := false;
-if {x_banana #= false} then 
-    {1 #+ {3 #* 5}} 
-else 2 
+x_super_banana :=
+
+    if {x_banana #= false} then 
+        {1 #+ {3 #* 5}} 
+    else 2;
+    
+@ ([1], [x_super_banana])

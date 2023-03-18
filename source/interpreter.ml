@@ -1,11 +1,11 @@
-type noper = Add | Mul | Div | And | Or | Equals | Greater | GreaterEq | Less | LessEq
+type noper = Add | Mul | Div | And | Or | Equals | Greater | GreaterEq | Less | LessEq | ListConcat
 type uoper = Neg | Not
 
 
 type identifier = Var of string 
 
 type env = identifier -> simple_type
-and  simple_type = Int of int | Unbound of string | Closure of identifier * expr * env | AnonFun of identifier * expr | RecClosure of identifier * identifier * expr * env | Bool of bool
+and  simple_type = Int of int | Unbound of string | Closure of identifier * expr * env | AnonFun of identifier * expr | RecClosure of identifier * identifier * expr * env | Bool of bool | MyList of (expr list)
 and  func = Nop of noper | Uop of uoper | Lambda of identifier * expr | FunExpr of expr
 and  expr = Atom of simple_type | Apply of func * (expr list) | Sym of identifier | LetIn of decl * expr | IfThenElse of expr * expr * expr
 and  decl = Decl of identifier * expr
@@ -151,21 +151,52 @@ let negate_bool lis = match lis with
     | _ -> failwith("type error in negate_bool")
     
     
+    
+(* LIST OPERATIONS *)
+    
+let rec list_concat lis = match lis with
+    | [] -> MyList([])
+    | MyList(l) :: lis1 -> (match (list_concat lis1) with
+                            | MyList(l1) ->  MyList (l @ l1)
+                            | _ -> failwith("type error in list_concat"))
+
+    | Unbound s :: _  -> failwith("type error in list_concat; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in list_concat")
+    
+    
+    
 (* Environment *)
 let emptyenv = fun x -> (match x with Var (name) -> Unbound name)
 
 let bind (iden, value, old_env) = fun x -> if (x = iden) then value else old_env(x)
 
+(* Conversions, printing *)
 
+let rec string_of_simple_type x = (match x with
+    | Int n   -> (string_of_int n)
+    | Unbound s -> "unbound \"" ^ s ^ "\""
+    | AnonFun _ -> "function"
+    | Closure _ -> "closure"
+    | RecClosure _ -> "recursive closure"
+    | Bool b    -> if b then ("true") else ("false")
+    | MyList lis  -> "[" ^ string_of_list lis ^ "]"
+)
+                    
+and string_of_list lis = (match lis with 
+    | [] -> ""
+    | a :: [] -> ( match a with Atom (a) -> (string_of_simple_type a)
+                    | _ -> "list is not fully evalued"
+      )
+    | a :: lis1 -> ( match a with Atom (a) -> (string_of_simple_type a) ^ ", " ^ string_of_list lis1
+                    | _ -> "list is not fully evalued"
+    )
+)
 
-let print_simple_type x = match x with
-    | Int n   -> print_string ((string_of_int n) ^ "\n" )
-    | Unbound s -> print_string ("unbound \"" ^ s ^ "\"\n" )
-    | AnonFun _ -> print_string("function\n")
-    | Closure _ -> print_string ("closure\n" )
-    | RecClosure _ -> print_string ("recursive closure\n" )
-    | Bool b    -> print_string (if b then ("true\n") else ("false\n"))
+let print_simple_type x = print_string ((string_of_simple_type x) ^ "\n")
 
+let rec expr_list_of_simple_type_list (lis : simple_type list) = match lis with
+    | [] -> []
+    | a :: lis1-> [Atom (a)] @ expr_list_of_simple_type_list lis1
 
 (* Expression evalutaion *)
 
@@ -176,20 +207,22 @@ print_simple_type (env (Var("x")));*)
 match x with
     | Atom (a) -> (match a with
                     | AnonFun (id, x) -> Closure (id, x, env)
+                    | MyList l -> MyList (expr_list_of_simple_type_list (List.map (eval env) l))
                     | _ -> a )
                     
-    | Apply (func, lis) -> (match func with 
-        | Nop (op)      -> (match op with
-            | Add       -> add_integers(List.map (eval env) lis )
-            | Mul       -> multiply_integers(List.map (eval env) lis)
-            | Div       -> divide_integers(List.map (eval env) lis)
-            | Or        -> or_bool (List.map (eval env) lis)
-            | And       -> and_bool (List.map (eval env) lis)
-            | Equals    -> euals_generic (List.map (eval env) lis)
-            | Greater   -> greater_int   (List.map (eval env) lis)
-            | Less      -> less_int      (List.map (eval env) lis)
-            | GreaterEq -> greater_eq_int(List.map (eval env) lis)
-            | LessEq    -> less_eq_int   (List.map (eval env) lis)
+    | Apply (func, lis)  -> (match func with 
+        | Nop (op)       -> (match op with
+            | Add        -> add_integers(List.map (eval env) lis )
+            | Mul        -> multiply_integers(List.map (eval env) lis)
+            | Div        -> divide_integers(List.map (eval env) lis)
+            | Or         -> or_bool (List.map (eval env) lis)
+            | And        -> and_bool (List.map (eval env) lis)
+            | Equals     -> euals_generic (List.map (eval env) lis)
+            | Greater    -> greater_int   (List.map (eval env) lis)
+            | Less       -> less_int      (List.map (eval env) lis)
+            | GreaterEq  -> greater_eq_int(List.map (eval env) lis)
+            | LessEq     -> less_eq_int   (List.map (eval env) lis)
+            | ListConcat -> list_concat   (List.map (eval env) lis)
             )
         | Uop (op)  -> (match op with
             | Neg   -> negate_int (List.map (eval env) lis)
@@ -243,13 +276,11 @@ match x with
     
     
 
-(* (lam (x) . (+ (x, x)))(5) *)
-
-let x = Apply(Nop(Div), [Atom(Int(6)) ; Atom(Int(3))])
 
 
+let x = Apply(Nop(ListConcat), [Atom(MyList([Atom(Int(1)) ; Atom(Int(2)) ; Atom(Int(3))])) ; Atom(MyList([Atom(Int(6)) ; Atom(Int(7)) ; Atom(Int(8))]))]);;
 
-
+(* print_simple_type ( eval emptyenv x );; *)
 
 (* eval emptyenv x ;; *)
 

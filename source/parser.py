@@ -32,9 +32,19 @@ def Tree (tok, lis):
     if tok[1] == "anonfun":
         return f"Atom(AnonFun(Var (\"{lis[0][1]}\"), {lis[1]}))"
     
+    if tok[1] == "list":
+        elements = ""
+        for i in range(len(lis)):
+            if i == 0:
+                elements += lis[i]
+            else:
+                elements += " ; " + lis[i]
+            
+        return f"Atom(MyList([{elements}]))"
+    
     
     if tok[1] == "op":
-        if lis[0][1] in ["+", "*", "/", "^", "&", "=", ">", ">=", "<", "<="]:        # n-ary operations
+        if lis[0][1] in ["+", "*", "/", "^", "&", "=", ">", ">=", "<", "<=", "@"]:        # n-ary operations
             operation = ""
             
             #type noper = Add | Mul | And | Or | Equals | Greater | GreaterEq | Less | LessEq
@@ -60,7 +70,9 @@ def Tree (tok, lis):
             elif lis[0][1] == "<":
                 operation = "Less"            
             elif lis[0][1] == ">=":
-                operation = "LessEq"            
+                operation = "LessEq"
+            elif lis[0][1] == "@":
+                operation = "ListConcat"   
 
             operands = ""
             for i in range(1, len(lis)):
