@@ -1,7 +1,8 @@
 import sys
 
 from lark import Lark
-
+from lark import UnexpectedEOF
+from lark import UnexpectedInput
 
 def Token (t, n):
     return (t, n)
@@ -117,8 +118,17 @@ def parse_program (program):
     f = open("./source/pg.lark", "r")
 
     l = Lark(f.read())
-
-    a = eval(str(l.parse(program)))
+    
+    try:
+        parsed = l.parse(program)
+    except Exception as u:
+        if type (u) == UnexpectedEOF or type (u) == UnexpectedInput:
+            print("Parser Error")
+            print(u.get_context(program))
+            print(u)
+        exit(1)
+    
+    a = eval(str(parsed))
 
 
     f = open("out.ml", "w")

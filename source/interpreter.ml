@@ -13,22 +13,22 @@ and  decl = Decl of identifier * expr
 
 (* GENERIC OPERATIONS *)
 
-let rec euals_generic lis = (match lis with
+let rec equals_generic lis = (match lis with
     | [] -> Bool(true)
     | Int(a) :: lis1 -> (match lis1 with 
                             | [] -> Bool(true)
                             | Int(b) :: [] -> Bool (a = b)
-                            | Int(_) :: _  -> failwith("type error in euals_generic; two args max expected")
-                            | _ -> failwith("type error in euals_generic"))
+                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
+                            | _ -> failwith("type error in equals_generic"))
     
     | Bool(a) :: lis1 -> (match lis1 with 
                             | [] -> Bool(true)
                             | Bool(b) :: [] -> Bool (a = b)
-                            | Bool(_) :: _  -> failwith("type error in euals_generic; two args max expected")
-                            | _ -> failwith("type error in euals_generic"))
+                            | Bool(_) :: _  -> failwith("type error in equals_generic; two args max expected")
+                            | _ -> failwith("type error in equals_generic"))
 
-    | Unbound s :: _  -> failwith("type error in euals_generic; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in euals_generic"))
+    | Unbound s :: _  -> failwith("type error in equals_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in equals_generic"))
     
     
 
@@ -79,12 +79,12 @@ let rec greater_int lis = (match lis with
     | Int(a) :: lis1 -> (match lis1 with 
                             | [] -> Bool(true)
                             | Int(b) :: [] -> Bool (a > b)
-                            | Int(_) :: _  -> failwith("type error in euals_generic; two args max expected")
-                            | _ -> failwith("type error in euals_generic"))
+                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
+                            | _ -> failwith("type error in equals_generic"))
     
 
     | Unbound s :: _  -> failwith("type error in greater_int; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in euals_generic"))
+    | _ -> failwith("type error in equals_generic"))
     
     
 let rec less_int lis = (match lis with
@@ -92,24 +92,24 @@ let rec less_int lis = (match lis with
     | Int(a) :: lis1 -> (match lis1 with 
                             | [] -> Bool(true)
                             | Int(b) :: [] -> Bool (a < b)
-                            | Int(_) :: _  -> failwith("type error in euals_generic; two args max expected")
-                            | _ -> failwith("type error in euals_generic"))
+                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
+                            | _ -> failwith("type error in equals_generic"))
     
 
     | Unbound s :: _  -> failwith("type error in less_int; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in euals_generic"))
+    | _ -> failwith("type error in equals_generic"))
 
 let rec greater_eq_int lis = (match lis with
     | [] -> Bool(true)
     | Int(a) :: lis1 -> (match lis1 with 
                             | [] -> Bool(true)
                             | Int(b) :: [] -> Bool (a >= b)
-                            | Int(_) :: _  -> failwith("type error in euals_generic; two args max expected")
-                            | _ -> failwith("type error in euals_generic"))
+                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
+                            | _ -> failwith("type error in equals_generic"))
     
 
     | Unbound s :: _  -> failwith("type error in greater_eq_int; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in euals_generic"))
+    | _ -> failwith("type error in equals_generic"))
     
     
 let rec less_eq_int lis = (match lis with
@@ -117,12 +117,12 @@ let rec less_eq_int lis = (match lis with
     | Int(a) :: lis1 -> (match lis1 with 
                             | [] -> Bool(true)
                             | Int(b) :: [] -> Bool (a <= b)
-                            | Int(_) :: _  -> failwith("type error in euals_generic; two args max expected")
-                            | _ -> failwith("type error in euals_generic"))
+                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
+                            | _ -> failwith("type error in equals_generic"))
     
 
     | Unbound s :: _  -> failwith("type error in less_eq_int; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in euals_generic"))
+    | _ -> failwith("type error in equals_generic"))
 
 
 (* BOOLEAN OPERATIONS *)
@@ -217,7 +217,7 @@ match x with
             | Div        -> divide_integers(List.map (eval env) lis)
             | Or         -> or_bool (List.map (eval env) lis)
             | And        -> and_bool (List.map (eval env) lis)
-            | Equals     -> euals_generic (List.map (eval env) lis)
+            | Equals     -> equals_generic (List.map (eval env) lis)
             | Greater    -> greater_int   (List.map (eval env) lis)
             | Less       -> less_int      (List.map (eval env) lis)
             | GreaterEq  -> greater_eq_int(List.map (eval env) lis)
