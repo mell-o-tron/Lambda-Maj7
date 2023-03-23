@@ -1,14 +1,46 @@
-type noper = Add | Mul | Div | And | Or | Equals | Greater | GreaterEq | Less | LessEq | ListConcat
+type noper = Add | Mul | Div | And | Or | Equals | Greater | GreaterEq | Less | LessEq | ListConcat | Elem
 type uoper = Neg | Not
 
 
 type identifier = Var of string 
 
 type env = identifier -> simple_type
-and  simple_type = Int of int | Unbound of string | Closure of identifier * expr * env | AnonFun of identifier * expr | RecClosure of identifier * identifier * expr * env | Bool of bool | MyList of (expr list)
+and  simple_type = Int of int | Unbound of string | Closure of identifier * expr * env | AnonFun of identifier * expr | RecClosure of identifier * identifier * expr * env | Bool of bool | MyList of (expr list) | Tuple of (expr list)
 and  func = Nop of noper | Uop of uoper | Lambda of identifier * expr | FunExpr of expr
 and  expr = Atom of simple_type | Apply of func * (expr list) | Sym of identifier | LetIn of decl * expr | IfThenElse of expr * expr * expr
 and  decl = Decl of identifier * expr
+
+
+
+(* Conversions, printing *)
+
+let rec string_of_simple_type x = (match x with
+    | Int n   -> (string_of_int n)
+    | Unbound s -> "unbound \"" ^ s ^ "\""
+    | AnonFun _ -> "function"
+    | Closure _ -> "closure"
+    | RecClosure _ -> "recursive closure"
+    | Bool b    -> if b then ("true") else ("false")
+    | MyList lis  -> "[" ^ string_of_list lis ^ "]"
+    | Tuple  lis  -> "(" ^ string_of_list lis ^ ")"
+)
+                    
+and string_of_list lis = (match lis with 
+    | [] -> ""
+    | a :: [] -> ( match a with Atom (a) -> (string_of_simple_type a)
+                    | _ -> "list is not fully evalued"
+      )
+    | a :: lis1 -> ( match a with Atom (a) -> (string_of_simple_type a) ^ ", " ^ string_of_list lis1
+                    | _ -> "list is not fully evalued"
+    )
+)
+
+let print_simple_type x = print_string ((string_of_simple_type x) ^ "\n")
+
+let rec expr_list_of_simple_type_list (lis : simple_type list) = match lis with
+    | [] -> []
+    | a :: lis1-> [Atom (a)] @ expr_list_of_simple_type_list lis1
+
 
 
 (* GENERIC OPERATIONS *)
@@ -164,39 +196,29 @@ let rec list_concat lis = match lis with
     | _ -> failwith("type error in list_concat")
     
     
+(* TUPLE OPERATIONS *)
+
+let get_tuple_element lis = 
+    let rec aux tup i orig_tuple = (match tup with
+        | [] -> failwith ("Tuple '" ^ (string_of_simple_type orig_tuple) ^ "' has no " ^ (string_of_int i) ^ "th element" )
+        | e :: tup1 -> if i = 0 then (match e with 
+                                        | Atom(e1) -> e1 
+                                        | _ -> failwith ("type error in get_tuple_element"))
+                                else (aux tup1 (i - 1) orig_tuple))
+    in match lis with
+        | a::(b::[]) -> (match a, b with
+                        | Tuple(t), Int(n)  -> if n >= 0 then (aux t n a) else failwith ("elem index should be positive")
+                        |  _ -> failwith ("type error in get_tuple_element")
+                      ) 
+        | _ -> failwith ("type error in get_tuple_element")
+
     
 (* Environment *)
 let emptyenv = fun x -> (match x with Var (name) -> Unbound name)
 
 let bind (iden, value, old_env) = fun x -> if (x = iden) then value else old_env(x)
 
-(* Conversions, printing *)
 
-let rec string_of_simple_type x = (match x with
-    | Int n   -> (string_of_int n)
-    | Unbound s -> "unbound \"" ^ s ^ "\""
-    | AnonFun _ -> "function"
-    | Closure _ -> "closure"
-    | RecClosure _ -> "recursive closure"
-    | Bool b    -> if b then ("true") else ("false")
-    | MyList lis  -> "[" ^ string_of_list lis ^ "]"
-)
-                    
-and string_of_list lis = (match lis with 
-    | [] -> ""
-    | a :: [] -> ( match a with Atom (a) -> (string_of_simple_type a)
-                    | _ -> "list is not fully evalued"
-      )
-    | a :: lis1 -> ( match a with Atom (a) -> (string_of_simple_type a) ^ ", " ^ string_of_list lis1
-                    | _ -> "list is not fully evalued"
-    )
-)
-
-let print_simple_type x = print_string ((string_of_simple_type x) ^ "\n")
-
-let rec expr_list_of_simple_type_list (lis : simple_type list) = match lis with
-    | [] -> []
-    | a :: lis1-> [Atom (a)] @ expr_list_of_simple_type_list lis1
 
 (* Expression evalutaion *)
 
@@ -208,6 +230,7 @@ match x with
     | Atom (a) -> (match a with
                     | AnonFun (id, x) -> Closure (id, x, env)
                     | MyList l -> MyList (expr_list_of_simple_type_list (List.map (eval env) l))
+                    | Tuple t  -> Tuple(expr_list_of_simple_type_list (List.map (eval env) t))
                     | _ -> a )
                     
     | Apply (func, lis)  -> (match func with 
@@ -223,6 +246,8 @@ match x with
             | GreaterEq  -> greater_eq_int(List.map (eval env) lis)
             | LessEq     -> less_eq_int   (List.map (eval env) lis)
             | ListConcat -> list_concat   (List.map (eval env) lis)
+            | Elem       -> get_tuple_element (List.map (eval env) lis)
+            
             )
         | Uop (op)  -> (match op with
             | Neg   -> negate_int (List.map (eval env) lis)
@@ -278,9 +303,8 @@ match x with
 
 
 
-let x = Apply(Nop(ListConcat), [Atom(MyList([Atom(Int(1)) ; Atom(Int(2)) ; Atom(Int(3))])) ; Atom(MyList([Atom(Int(6)) ; Atom(Int(7)) ; Atom(Int(8))]))]);;
+(*let x = Apply(Nop(Elem), [Atom(Tuple([Atom(Int(1)) ; Atom(Int(2)) ; Atom(Int(3))])) ; Atom(Int(-1))]);;
 
-(* print_simple_type ( eval emptyenv x );; *)
-
+ print_simple_type ( eval emptyenv x );; *)
 (* eval emptyenv x ;; *)
 

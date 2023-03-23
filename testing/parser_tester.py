@@ -40,9 +40,19 @@ def Tree (tok, lis):
             
         return f"Atom(MyList([{elements}]))"
     
+    if tok[1] == "tuple":
+        elements = ""
+        for i in range(len(lis)):
+            if i == 0:
+                elements += lis[i]
+            else:
+                elements += " ; " + lis[i]
+            
+        return f"Atom(Tuple([{elements}]))"
+    
     
     if tok[1] == "op":
-        if lis[0][1] in ["+", "*", "/", "^", "&", "=", ">", ">=", "<", "<=", "@"]:        # n-ary operations
+        if lis[0][1] in ["+", "*", "/", "^", "&", "=", ">", ">=", "<", "<=", "@", "elem"]:        # n-ary operations
             operation = ""
             
             #type noper = Add | Mul | And | Or | Equals | Greater | GreaterEq | Less | LessEq
@@ -70,7 +80,9 @@ def Tree (tok, lis):
             elif lis[0][1] == ">=":
                 operation = "LessEq"
             elif lis[0][1] == "@":
-                operation = "ListConcat"   
+                operation = "ListConcat"
+            elif lis[0][1] == "elem":
+                operation = "Elem"
 
             operands = ""
             for i in range(1, len(lis)):
@@ -111,7 +123,7 @@ def Tree (tok, lis):
 
 
 
-program = "@([1,2,3], [6,7,8])"
+program = "elem((1,2,3), 0)"
 
 f = open("pg.lark", "r")
 l = Lark(f.read())
