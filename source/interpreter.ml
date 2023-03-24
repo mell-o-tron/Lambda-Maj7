@@ -7,7 +7,7 @@ type identifier = Var of string
 type env = identifier -> simple_type
 and  simple_type = Int of int | Unbound of string | Closure of identifier * expr * env | AnonFun of identifier * expr | RecClosure of identifier * identifier * expr * env | Bool of bool | MyList of (expr list) | Tuple of (expr list)
 and  func = Nop of noper | Uop of uoper | Lambda of identifier * expr | FunExpr of expr
-and  expr = Atom of simple_type | Apply of func * (expr list) | Sym of identifier | LetIn of decl * expr | IfThenElse of expr * expr * expr
+and  expr = Atom of simple_type | Apply of func * (expr list) | Sym of identifier | LetIn of decl * expr | IfThenElse of expr * expr * expr | Unpack of (identifier list * (identifier option) * expr * expr)
 and  decl = Decl of identifier * expr
 
 
@@ -294,16 +294,46 @@ match x with
                                             )
                                             
                         )
-    | IfThenElse (e1, e2, e3) -> match ((eval env) e1) with 
+    | IfThenElse (e1, e2, e3) -> (match ((eval env) e1) with 
                         
                         | Bool(b) -> if b then ((eval env) e2) else ((eval env) e3)
                         | _ -> failwith ("type error, boolean expected")
+                        )
     
+    | Unpack (lis, rest, e1, e) -> ( match eval env e1 with 
+                                        | MyList(expr_list) -> (match List.length(lis), List.length(expr_list), rest with
+                                                | m, n, None -> if m = n then
+                                                    let rec bindAll ides values old_env = (match ides, values with
+                                                        | [], []           -> old_env
+                                                        | a :: l1, b :: l2 -> bindAll l1 l2 (bind (a, b, old_env) )
+                                                        | _ -> failwith ("somwthing went wrong while unpacking")
+                                                    
+                                                    ) in let values = (List.map (eval env) expr_list)
+                                                    in eval (bindAll lis values env) e
+                                                    else failwith("Number of elements not matching in unpacking")
+                                                | m, n, Some l -> if m < n then 
+                                                    let rec bindSome ides values old_env = (match ides, values with
+                                                        | [], rest           -> old_env, rest
+                                                        | a :: l1, b :: l2 -> bindSome l1 l2 (bind (a, b, old_env) )
+                                                        | _ -> failwith ("somwthing went wrong while unpacking")
+                                                    
+                                                    ) in let values = (List.map (eval env) expr_list)
+                                                    in (match (bindSome lis values env) with
+                                                        | env1, rest -> let expr_rest = expr_list_of_simple_type_list rest in
+                                                                        let env_with_rest = bind (l, MyList(expr_rest), env1)
+                                                                        in eval env_with_rest e
+                                                       )
+                                                    else failwith ("Number of elements exceeding ellipsis")
+                                                    
+                                             )
+                                        | _ -> failwith ("Type error: can only unpack list")
+    
+                                    )
     
 
 
 
-(*let x = Apply(Nop(Elem), [Atom(Tuple([Atom(Int(1)) ; Atom(Int(2)) ; Atom(Int(3))])) ; Atom(Int(-1))]);;
+(*let x = Unpack([Var("a") ; Var("b")], Some(Var("c")), Atom(MyList([Atom(Int(1)) ; Atom(Int(2)) ; Atom(Int(3))])), Sym(Var("b")));;
 
  print_simple_type ( eval emptyenv x );; *)
 (* eval emptyenv x ;; *)

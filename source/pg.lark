@@ -5,6 +5,7 @@ IDE         : /(?!(true|false|lam|if|then|else|elem)\b)[a-z_][a-z0-9_]*/i
 SYM         : IDE
 IN          : ";" 
 BOOL        : "true" | "false"
+ELLIPSIS    : "..." IDE
 
 anonfun     : "lam" "(" IDE ")" "=>" "{" expr "}"
 list        : "[" (expr ("," expr)*)? "]"
@@ -15,9 +16,11 @@ lambda      : "lam" "(" IDE ")" "=>" "{" expr "}"
 lambda_app  : lambda expr
 op          : UOP expr | NOP "(" (expr + ",")* expr ")"
 decl        : SYM ":=" expr
+list_pattern: "[" (IDE ("," IDE)*)? ("," ELLIPSIS)? "]"
 letin       : decl IN expr
+unpack      : list_pattern "<-" expr IN expr
 conditional :  "if" expr "then" expr "else" expr
-expr        : conditional | atom | op | lambda_app | expr_app | SYM | "(" + expr + ")" | letin
+expr        : conditional | atom | op | lambda_app | expr_app | SYM | "(" + expr + ")" | letin | unpack
 
 start       : expr
 

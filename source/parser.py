@@ -120,6 +120,30 @@ def Tree (tok, lis):
     if tok[1] == "conditional":
         return f"IfThenElse({lis[0]}, {lis[1]}, {lis[2]})"
     
+    if tok[1] == "list_pattern":
+        ide_list = []
+        rest = "None"
+        for p in lis:
+            if p[0] == "IDE":
+                ide_list.append(f"Var(\"{p[1]}\")")
+            else:
+                rest = f"Some(Var(\"{p[1][3:]}\"))"
+            
+        for i in range(len(ide_list)):
+            if i != len(ide_list) - 1:
+                ide_list[i] += " ; "
+                
+        ides = ""
+        for p in ide_list:
+            ides += p
+            
+        return (f"[{ides}]", rest)
+        
+    if tok[1] == "unpack":
+        ides, rest = lis[0]
+        
+        return f"Unpack({ides}, {rest}, {lis[1]}, {lis[3]})"      # 3 because for some reason I added IN 
+                                                                  # as an explicit terminal       
     
     return "idk"
 
@@ -138,7 +162,11 @@ def parse_program (program):
             print("Parser Error")
             print(u.get_context(program))
             print(u)
+        else:
+            print(u)
         exit(1)
+        
+        
     
     a = eval(str(parsed))
 
