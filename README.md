@@ -6,15 +6,7 @@
 ## Features
 - The currently available data types are integers, booleans, lists, tuples and lambdas.
 - The operations are represented in pre-fix notation, and most of them are n-ary (this might change in the future).
-- The functions are all unary, and there is no built-in syntactic sugar for functions of the type `t1->t2->t3`. You just have to use explicit currying (or use tuples if you wish):
-```
-f := lam(x1) => {
-    g := lam(x2) => {
-        ...
-    }
-};
-(f g) input;
-```
+- The functions are all unary, and there is no built-in syntactic sugar for functions of the type `t1->t2->t3`. You just have to use explicit currying (or use tuples if you wish).
 - List unpacking: the following code outputs `[4, 5, 6]`
 
 ```
