@@ -1,5 +1,5 @@
 type noper = Add | Mul | Div | And | Or | Equals | Greater | GreaterEq | Less | LessEq | ListConcat | Elem
-type uoper = Neg | Not
+type uoper = Neg | Not | Empty
 
 
 type identifier = Var of string 
@@ -16,7 +16,7 @@ and  decl = Decl of identifier * expr
 
 let rec string_of_simple_type x = (match x with
     | Int n   -> (string_of_int n)
-    | Unbound s -> "unbound \"" ^ s ^ "\""
+    | Unbound s -> "unbound '" ^ s ^ "'"
     | AnonFun _ -> "function"
     | Closure _ -> "closure"
     | RecClosure _ -> "recursive closure"
@@ -194,8 +194,14 @@ let rec list_concat lis = match lis with
 
     | Unbound s :: _  -> failwith("type error in list_concat; unbound variable '" ^ s ^ "' found")
     | _ -> failwith("type error in list_concat")
-    
-    
+
+let rec is_empty lis = (match lis with
+    | MyList ([])::[]   -> Bool(true)
+    | MyList (_)::[]    -> Bool(false)
+    | x :: _            -> failwith("type error in is_empty: " ^ string_of_simple_type x)
+    | []                -> failwith("type error in is_empty: no arguments provided")
+)
+
 (* TUPLE OPERATIONS *)
 
 let get_tuple_element lis = 
@@ -252,6 +258,7 @@ match x with
         | Uop (op)  -> (match op with
             | Neg   -> negate_int (List.map (eval env) lis)
             | Not   -> negate_bool (List.map (eval env) lis)
+            | Empty -> is_empty (List.map (eval env) lis)
             )
             
         | Lambda (x, e) ->  (*print_string "Applying lambda...\n";*)
@@ -270,8 +277,15 @@ match x with
                                     
                                     (*(match n with Var (name) -> print_string (name ^ "("));*)        (* DEBUG *)
                                     (*(match x with Var (name) -> print_string (name ^ ")\n"));*)
-                                    let env1_with_arg = bind (x, env(x), env1) in
-                                    let env_rec = bind( n, e_evald, env1_with_arg ) in
+                                    (*
+                                        SCOPING NOTE
+                                            Since i'm currently using lazy evaluation of identifiers, and since I'm lazy myself and can't be bothered to manage each and every case for recursive closures, I decided that, at least for now, recursive closures shall have dynamic scoping.
+                                    
+                                            The following two lines enable static scoping, uncomment them and comment the following at your own risk.
+                                    *)
+                                    (*let env1_with_arg = bind (x, env(x), env1) in*)
+                                    (*let env_rec = bind( n, e_evald, env1_with_arg ) in*)
+                                    let env_rec = bind( n, e_evald, env ) in
                                     ((eval env_rec) (Apply((Lambda (x, e1)) , lis)))
                                     
                             | Unbound s -> failwith ("type error, closure expected and unbound variable '" ^ s ^ "' found")
@@ -311,7 +325,8 @@ match x with
                                                     ) in let values = (List.map (eval env) expr_list)
                                                     in eval (bindAll lis values env) e
                                                     else failwith("Number of elements not matching in unpacking")
-                                                | m, n, Some l -> if m < n then 
+                                                    
+                                                | m, n, Some l -> if m <= n then 
                                                     let rec bindSome ides values old_env = (match ides, values with
                                                         | [], rest           -> old_env, rest
                                                         | a :: l1, b :: l2 -> bindSome l1 l2 (bind (a, b, old_env) )
@@ -323,7 +338,7 @@ match x with
                                                                         let env_with_rest = bind (l, MyList(expr_rest), env1)
                                                                         in eval env_with_rest e
                                                        )
-                                                    else failwith ("Number of elements exceeding ellipsis")
+                                                    else failwith ("Too many variables (" ^ (string_of_int m) ^ ") for " ^ (string_of_int n) ^ " elements")
                                                     
                                              )
                                         | _ -> failwith ("Type error: can only unpack list")
@@ -333,7 +348,7 @@ match x with
 
 
 
-(*let x = Unpack([Var("a") ; Var("b")], Some(Var("c")), Atom(MyList([Atom(Int(1)) ; Atom(Int(2)) ; Atom(Int(3))])), Sym(Var("b")));;
+(*let x = Apply(Uop(Empty), [Atom(MyList([]))]);;
 
  print_simple_type ( eval emptyenv x );; *)
 (* eval emptyenv x ;; *)

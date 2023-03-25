@@ -1,0 +1,5 @@
+len := lam (lis) => {
+    if empty(lis) then 0 else 
+        ([a, ...r] <- lis; + (1, len (r)))
+
+}; len [1,2, 3, 4, 5] 

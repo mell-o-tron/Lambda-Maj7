@@ -1,6 +1,4 @@
-#include "./test_include.maj7"
-
 reverse := lam (lis) => {
     if empty (lis) then [] else ([a, ...rest] <- lis; @(reverse rest, [a]))
     
-}; reverse [1,3,5,7]
+}; reverse [1,3,5,7] 

@@ -91,12 +91,14 @@ def Tree (tok, lis):
                     operands += " ; "
             return f"Apply(Nop({operation}), [{operands}])"
         
-        if lis[0][1] in ["-", "!"]: # 1-ary operations
+        if lis[0][1] in ["-", "!", "empty"]: # 1-ary operations
             operation = ""
             if lis[0][1] == "-":                            
                 operation = "Neg"
             if lis[0][1] == "!":                            
                 operation = "Not"
+            if lis[0][1] == "empty":                            
+                operation = "Empty"
             operand = lis[1]
         return f"Apply(Uop({operation}), [{operand}])"
     
@@ -147,7 +149,7 @@ def Tree (tok, lis):
 
 
 
-program = "[a, b, ...c] <- [1, 2, 3] ; a "
+program = "empty ([])"
 
 f = open("pg.lark", "r")
 l = Lark(f.read())
