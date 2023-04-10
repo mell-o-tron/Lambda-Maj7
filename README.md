@@ -4,7 +4,7 @@
 λ-maj7 is a (very much WIP) functional programming language. Its interpreter is written in OCaml, while the parsing is done with Lark, and the syntax tree is converted to OCaml through a Python script.
 
 ## Features
-- The currently available data types are integers, booleans, lists, tuples and lambdas.
+- The currently available data types are integers, floats, booleans, lists, tuples and lambdas.
 - The operations are represented in pre-fix notation, and most of them are n-ary (this might change in the future).
 - The functions are all unary, and there is no built-in syntactic sugar for functions of the type `t1->t2->t3`. You just have to use explicit currying (or use tuples if you wish).
 - List unpacking: the following code outputs `[4, 5, 6]`
@@ -24,7 +24,6 @@ rest
 - If you're using Kate by KDE, I'm also including a simple syntax highlighting file.
 
 ## Planned features
-- Floating point numbers
 - Parsing error messages, better runtime error messages
 - Static checks
 - Pattern matching

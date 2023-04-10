@@ -1,5 +1,3 @@
-#include "./test_include.maj7"
-
 bisection := lam (f) => {
     aux := lam (limits) => {
         a := elem(limits, 0);

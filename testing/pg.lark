@@ -1,4 +1,5 @@
 INTEGER     : /[0-9]+/
+FLOAT       : /[0-9]*.[0-9]+/
 NOP         : "+" | "*" | "/" | "=" | ">" | ">=" | "<" | "<=" | "&" | "^" | "@" | "elem"
 UOP         : "-" | "!" | "empty"
 IDE         : /(?!(true|false|lam|if|then|else|elem|empty)\b)[a-z_][a-z0-9_]*/i
@@ -10,7 +11,7 @@ ELLIPSIS    : "..." IDE
 anonfun     : "lam" "(" IDE ")" "=>" "{" expr "}"
 list        : "[" (expr ("," expr)*)? "]"
 tuple       : "(" (expr ("," expr)*)? ")"
-atom        : INTEGER | anonfun | BOOL | list | tuple
+atom        : INTEGER | FLOAT | anonfun | BOOL | list | tuple
 expr_app    : expr expr
 lambda      : "lam" "(" IDE ")" "=>" "{" expr "}"
 lambda_app  : lambda expr

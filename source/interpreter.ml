@@ -5,7 +5,7 @@ type uoper = Neg | Not | Empty
 type identifier = Var of string 
 
 type env = identifier -> simple_type
-and  simple_type = Int of int | Unbound of string | Closure of identifier * expr * env | AnonFun of identifier * expr | RecClosure of identifier * identifier * expr * env | Bool of bool | MyList of (expr list) | Tuple of (expr list)
+and  simple_type = Int of int | Unbound of string | Closure of identifier * expr * env | AnonFun of identifier * expr | RecClosure of identifier * identifier * expr * env | Bool of bool | MyList of (expr list) | Tuple of (expr list) | Float of float
 and  func = Nop of noper | Uop of uoper | Lambda of identifier * expr | FunExpr of expr
 and  expr = Atom of simple_type | Apply of func * (expr list) | Sym of identifier | LetIn of decl * expr | IfThenElse of expr * expr * expr | Unpack of (identifier list * (identifier option) * expr * expr)
 and  decl = Decl of identifier * expr
@@ -23,8 +23,9 @@ let rec string_of_simple_type x = (match x with
     | Bool b    -> if b then ("true") else ("false")
     | MyList lis  -> "[" ^ string_of_list lis ^ "]"
     | Tuple  lis  -> "(" ^ string_of_list lis ^ ")"
+    | Float f   -> (string_of_float f)
 )
-                    
+
 and string_of_list lis = (match lis with 
     | [] -> ""
     | a :: [] -> ( match a with Atom (a) -> (string_of_simple_type a)
@@ -43,26 +44,45 @@ let rec expr_list_of_simple_type_list (lis : simple_type list) = match lis with
 
 
 
-(* GENERIC OPERATIONS *)
 
-let rec equals_generic lis = (match lis with
-    | [] -> Bool(true)
-    | Int(a) :: lis1 -> (match lis1 with 
-                            | [] -> Bool(true)
-                            | Int(b) :: [] -> Bool (a = b)
-                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
-                            | _ -> failwith("type error in equals_generic"))
-    
-    | Bool(a) :: lis1 -> (match lis1 with 
-                            | [] -> Bool(true)
-                            | Bool(b) :: [] -> Bool (a = b)
-                            | Bool(_) :: _  -> failwith("type error in equals_generic; two args max expected")
-                            | _ -> failwith("type error in equals_generic"))
+(* FLOAT OPERATIONS *)
 
-    | Unbound s :: _  -> failwith("type error in equals_generic; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in equals_generic"))
-    
-    
+let rec add_floats lis = match lis with
+    | [] -> Float(0.)
+    | Float(n) :: lis1 -> (match add_floats lis1 with Float(n1) -> Float(n +. n1)
+                            | _ -> failwith ("error in add_floats") )
+    | Unbound s :: _  -> failwith("type error in add_floats; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in add_floats")
+
+
+let rec multiply_floats lis = match lis with
+    | [] -> Float(1.)
+    | Float(n) :: lis1 -> (match multiply_floats lis1 with Float(n1) -> Float(n *. n1)
+                            | _ -> failwith ("error in multiply_floats"))
+    | Unbound s :: _  -> failwith("type error in multiply_floats; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in multiply_floats")
+
+let rec divide_floats lis = match lis with
+    | [] -> Float(1.0)
+    | Float(a) :: lis1 -> (match lis1 with
+                            | [] ->  failwith("type error in divide_floats; two args expected")
+                            | Float(b) :: [] -> if b = 0.0 then failwith("division by zero")
+                                              else Float (a /. b)
+
+                            | Float(_) :: _  -> failwith("type error in divide_floats; two args expected")
+                            | _ -> failwith("type error in divide_floats"))
+
+    | Unbound s :: _  -> failwith("type error in divide_floats; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in divide_floats")
+
+let negate_float lis = match lis with
+    | [] -> failwith("error in negate_float; no arguments were given")
+    | Float(n) :: lis1 -> (match lis1 with
+                        | [] -> Float(-.n)
+                        | _ -> failwith ("error in negate_float; too many arguments were given")
+                        )
+    | Unbound s :: _  -> failwith("type error in negate_float; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in negate_float")
 
 (* INTEGER OPERATIONS *)
 
@@ -106,55 +126,7 @@ let negate_int lis = match lis with
     | _ -> failwith("type error in negate_int")
     
     
-let rec greater_int lis = (match lis with
-    | [] -> Bool(true)
-    | Int(a) :: lis1 -> (match lis1 with 
-                            | [] -> Bool(true)
-                            | Int(b) :: [] -> Bool (a > b)
-                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
-                            | _ -> failwith("type error in equals_generic"))
-    
 
-    | Unbound s :: _  -> failwith("type error in greater_int; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in equals_generic"))
-    
-    
-let rec less_int lis = (match lis with
-    | [] -> Bool(true)
-    | Int(a) :: lis1 -> (match lis1 with 
-                            | [] -> Bool(true)
-                            | Int(b) :: [] -> Bool (a < b)
-                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
-                            | _ -> failwith("type error in equals_generic"))
-    
-
-    | Unbound s :: _  -> failwith("type error in less_int; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in equals_generic"))
-
-let rec greater_eq_int lis = (match lis with
-    | [] -> Bool(true)
-    | Int(a) :: lis1 -> (match lis1 with 
-                            | [] -> Bool(true)
-                            | Int(b) :: [] -> Bool (a >= b)
-                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
-                            | _ -> failwith("type error in equals_generic"))
-    
-
-    | Unbound s :: _  -> failwith("type error in greater_eq_int; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in equals_generic"))
-    
-    
-let rec less_eq_int lis = (match lis with
-    | [] -> Bool(true)
-    | Int(a) :: lis1 -> (match lis1 with 
-                            | [] -> Bool(true)
-                            | Int(b) :: [] -> Bool (a <= b)
-                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
-                            | _ -> failwith("type error in equals_generic"))
-    
-
-    | Unbound s :: _  -> failwith("type error in less_eq_int; unbound variable '" ^ s ^ "' found")
-    | _ -> failwith("type error in equals_generic"))
 
 
 (* BOOLEAN OPERATIONS *)
@@ -218,6 +190,128 @@ let get_tuple_element lis =
                       ) 
         | _ -> failwith ("type error in get_tuple_element")
 
+
+(* GENERIC OPERATIONS *)
+
+let rec equals_generic lis = (match lis with
+    | [] -> Bool(true)
+    | Int(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Int(b) :: [] -> Bool (a = b)
+                            | Int(_) :: _  -> failwith("type error in equals_generic; two args max expected")
+                            | _ -> failwith("type error in equals_generic"))
+
+    | Bool(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Bool(b) :: [] -> Bool (a = b)
+                            | Bool(_) :: _  -> failwith("type error in equals_generic; two args max expected")
+                            | _ -> failwith("type error in equals_generic"))
+
+    | Unbound s :: _  -> failwith("type error in equals_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in equals_generic"))
+
+
+let add_generic lis = match lis with
+    | [] -> Int(0)
+    | Float(n) :: _ -> add_floats lis
+    | Int(n) :: _ -> add_integers lis
+    | Unbound s :: _  -> failwith("type error in add_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in add_generic")
+
+
+let multiply_generic lis = match lis with
+    | [] -> Int(1)
+    | Float(n) :: _ -> multiply_floats lis
+    | Int(n) :: _ -> multiply_integers lis
+    | Unbound s :: _  -> failwith("type error in multiply_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in multiply_generic")
+
+let divide_generic lis = match lis with
+    | [] -> Int(1)
+    | Float(n) :: _ -> divide_floats lis
+    | Int(n) :: _ -> divide_integers lis
+    | Unbound s :: _  -> failwith("type error in divide_floats; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in divide_floats")
+
+let negate_generic lis = match lis with
+    | [] -> failwith("no arguments found in negate_generic")
+    | Float(n) :: _ -> negate_float lis
+    | Int(n) :: _ -> negate_int lis
+    | Unbound s :: _  -> failwith("type error in negate_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in negate_generic")
+
+let rec greater_generic lis = (match lis with
+    | [] -> Bool(true)
+    | Int(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Int(b) :: [] -> Bool (a > b)
+                            | Int(_) :: _  -> failwith("type error in greater_generic; two args max expected")
+                            | _ -> failwith("type error in greater_generic"))
+    | Float(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Float(b) :: [] -> Bool (a > b)
+                            | Float(_) :: _  -> failwith("type error in greater_generic; two args max expected")
+                            | _ -> failwith("type error in greater_generic"))
+
+
+    | Unbound s :: _  -> failwith("type error in greater_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in greater_generic"))
+
+
+let rec less_generic lis = (match lis with
+    | [] -> Bool(true)
+    | Int(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Int(b) :: [] -> Bool (a < b)
+                            | Int(_) :: _  -> failwith("type error in less_generic; two args max expected")
+                            | _ -> failwith("type error in less_generic"))
+
+    | Float(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Float(b) :: [] -> Bool (a < b)
+                            | Float(_) :: _  -> failwith("type error in less_generic; two args max expected")
+                            | _ -> failwith("type error in less_generic"))
+
+
+    | Unbound s :: _  -> failwith("type error in less_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in less_generic"))
+
+let rec greater_eq_generic lis = (match lis with
+    | [] -> Bool(true)
+    | Int(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Int(b) :: [] -> Bool (a >= b)
+                            | Int(_) :: _  -> failwith("type error in greater_eq_generic; two args max expected")
+                            | _ -> failwith("type error in greater_eq_generic"))
+
+    | Float(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Float(b) :: [] -> Bool (a >= b)
+                            | Float(_) :: _  -> failwith("type error in greater_eq_generic; two args max expected")
+                            | _ -> failwith("type error in greater_eq_generic"))
+
+
+    | Unbound s :: _  -> failwith("type error in greater_eq_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in greater_eq_generic"))
+
+
+let rec less_eq_generic lis = (match lis with
+    | [] -> Bool(true)
+    | Int(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Int(b) :: [] -> Bool (a <= b)
+                            | Int(_) :: _  -> failwith("type error in less_eq_generic; two args max expected")
+                            | _ -> failwith("type error in less_eq_generic"))
+
+    | Float(a) :: lis1 -> (match lis1 with
+                            | [] -> Bool(true)
+                            | Float(b) :: [] -> Bool (a <= b)
+                            | Float(_) :: _  -> failwith("type error in less_eq_generic; two args max expected")
+                            | _ -> failwith("type error in less_eq_generic"))
+
+
+    | Unbound s :: _  -> failwith("type error in less_eq_generic; unbound variable '" ^ s ^ "' found")
+    | _ -> failwith("type error in less_eq_generic"))
     
 (* Environment *)
 let emptyenv = fun x -> (match x with Var (name) -> Unbound name)
@@ -239,24 +333,25 @@ match x with
                     | Tuple t  -> Tuple(expr_list_of_simple_type_list (List.map (eval env) t))
                     | _ -> a )
                     
-    | Apply (func, lis)  -> (match func with 
+    | Apply (func, lis)  ->
+    (match func with
         | Nop (op)       -> (match op with
-            | Add        -> add_integers(List.map (eval env) lis )
-            | Mul        -> multiply_integers(List.map (eval env) lis)
-            | Div        -> divide_integers(List.map (eval env) lis)
+            | Add        -> add_generic(List.map (eval env) lis )
+            | Mul        -> multiply_generic(List.map (eval env) lis)
+            | Div        -> divide_generic(List.map (eval env) lis)
             | Or         -> or_bool (List.map (eval env) lis)
             | And        -> and_bool (List.map (eval env) lis)
             | Equals     -> equals_generic (List.map (eval env) lis)
-            | Greater    -> greater_int   (List.map (eval env) lis)
-            | Less       -> less_int      (List.map (eval env) lis)
-            | GreaterEq  -> greater_eq_int(List.map (eval env) lis)
-            | LessEq     -> less_eq_int   (List.map (eval env) lis)
+            | Greater    -> greater_generic   (List.map (eval env) lis)
+            | Less       -> less_generic      (List.map (eval env) lis)
+            | GreaterEq  -> greater_eq_generic(List.map (eval env) lis)
+            | LessEq     -> less_eq_generic   (List.map (eval env) lis)
             | ListConcat -> list_concat   (List.map (eval env) lis)
             | Elem       -> get_tuple_element (List.map (eval env) lis)
             
             )
         | Uop (op)  -> (match op with
-            | Neg   -> negate_int (List.map (eval env) lis)
+            | Neg   -> negate_generic (List.map (eval env) lis)
             | Not   -> negate_bool (List.map (eval env) lis)
             | Empty -> is_empty (List.map (eval env) lis)
             )
@@ -271,10 +366,13 @@ match x with
                             else failwith ("non-unary function found"))
 
         | FunExpr (e)   -> let e_evald = ((eval env) e) in
+                            let arg_value = (eval env)(List.hd(lis)) in
                             (match e_evald with
-                            | Closure (x, e1, env1) -> ((eval env1) (Apply((Lambda (x, e1)) , lis)))
+
+                            | Closure (x, e1, env1) -> ((eval env1) (Apply((Lambda (x, e1)) , [Atom(arg_value)]))) (* eager evaluation of the argument *)
+                                                   (* might extend this to recclosures *)
                             | RecClosure (n, x, e1, env1) -> 
-                                    
+
                                     (*(match n with Var (name) -> print_string (name ^ "("));*)        (* DEBUG *)
                                     (*(match x with Var (name) -> print_string (name ^ ")\n"));*)
                                     (*
@@ -300,7 +398,7 @@ match x with
                         | Decl(x, e1) ->    let e1_evald = (eval env) e1 in
                                             (match e1_evald with
                                             | Closure (xc, ec, envc) ->
-                                                let new_env = bind(x, RecClosure (x, xc, ec, envc), env) in 
+                                                let new_env = bind(x, RecClosure (x, xc, ec, envc), env) in
                                                 (eval new_env) e
                                                    
                                             | _ -> let new_env = bind(x, e1_evald, env)
