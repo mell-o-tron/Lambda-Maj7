@@ -1,23 +1,8 @@
 #include "./test_include.maj7"
+#include "./math.maj7"
 
-bisection := lam (f) => {
-    aux := lam (limits) => {
-        a := elem(limits, 0);
-        b := elem(limits, 1);
-        i := elem(limits, 2);
-        center := /(+(a, b), 2.0);
-
-         if > (i, 100) then center
-         else(
-             if > ((f (center)), 0.0) then
-                 aux (a, center, +(i, 1))
-             else
-                 aux (center, b, +(i, 1))
-         )
-    }; aux (-1000.0, 1000.0, 0)
+norm := lam (v) => {
+    sqrt(+(* (elem(v, 0), elem(v, 0)), * (elem(v, 1), elem(v, 1))))
 };
 
-sqrt := lam (x) =>{
-    bisection(lam (y) => {+(*(y,y), -x)})
-};
-(sqrt 5.0)
+(norm (1.0, 1.0))

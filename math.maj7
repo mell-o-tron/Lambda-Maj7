@@ -1,0 +1,21 @@
+bisection := lam (f) => {
+    aux := lam (limits) => {
+        a := elem(limits, 0);
+        b := elem(limits, 1);
+        i := elem(limits, 2);
+        center := /(+(a, b), 2.0);
+
+         if > (i, 100) then center
+         else(
+             if > ((f (center)), 0.0) then
+                 aux (a, center, +(i, 1))
+             else
+                 aux (center, b, +(i, 1))
+         )
+    }; aux (-1000.0, 1000.0, 0)
+};
+
+sqrt := lam (x) =>{
+    bisection(lam (y) => {+(*(y,y), -x)})
+};
+PI := 3.1415926535;
