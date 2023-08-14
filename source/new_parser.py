@@ -3,6 +3,7 @@ import sys
 from lark import Lark
 from lark import UnexpectedEOF
 from lark import UnexpectedInput
+
 from lark import lexer
 
 def Token (t, n):
@@ -152,6 +153,14 @@ def Tree (tok, lis):
 
     return "idk"
 
+
+program = "+(0.1, 0.5)"
+
+f = open("pg.lark", "r")
+l = Lark(f.read())
+
+syntax_tree = l.parse(program)
+
 def ocamlize (syntax_tree):
     if type(syntax_tree) != lexer.Token:
         
@@ -166,33 +175,12 @@ def ocamlize (syntax_tree):
             
     else:
         return Token(str(syntax_tree.type), str(syntax_tree))
-
-
-def parse_program (program):
-    #print(program)
-    f = open("./source/pg.lark", "r")
-
-    l = Lark(f.read())
-    
-    try:
-        parsed = l.parse(program)
-    except Exception as u:
-        if type (u) == UnexpectedEOF or type (u) == UnexpectedInput:
-            print("Parser Error")
-            print(u.get_context(program))
-            print(u)
-        else:
-            print(u)
-        exit(1)
         
         
-    
-    a = ocamlize(parsed)
-
-
-    f = open("out.ml", "w")
-    f.write(f"#use \"./source/interpreter.ml\";;\n\nlet a = {a};;\n\nlet result = (eval emptyenv) a;;\n\nprint_simple_type result;;")
-    f.close()
         
-    #print(a)
+print(ocamlize(syntax_tree))
+
+#print(syntax_tree)
+#print(type(syntax_tree))
+#print(syntax_tree.children)
 
